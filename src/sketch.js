@@ -1,55 +1,63 @@
 let img;
-let c;
-let a;
 let tiles;
 let currentTile;
-let currentX;
-let currentY;
-let targetX;
-let targetY;
+let current;
+let target;
 let board;
 let prevTarget = {
   i: 0,
   j: 0
 };
-const step = 20;
+const step = 5;
+const horOffset = 0;
+const vertOffset = 0;
+const size = 300;
+const dim = 3;
 
 function preload() {
-  img = loadImage('assets/windows.jpeg');
+  img = loadImage('assets/square_circle.png');
+}
+
+function getImgCoords(r, c) {
+  return {
+    x: c * img.width / dim,
+    y: r * img.height / dim
+  };
 }
 
 function getCoords(r, c) {
   return {
-    x: c * width / 3,
-    y: r * height / 3
+    x: c * size / dim,
+    y: r * size / dim
   };
 }
 
 function setup() {
-  createCanvas(300, 300);
+  createCanvas(900, 700);
   a = 0;
-  board = [[1, -1, 2], [3, 4, 5], [6, 7, 8]];
+  board = [[1, -1, 2], [3, 4, 5], [6, 7, 8]]; //TODO make board
   tiles = [];
-  for (let i = 0; i < 3; i++) {
-    // tiles[i] = [];
-    for (let j = 0; j < 3; j++) {
+  for (let i = 0; i < dim; i++) {
+    for (let j = 0; j < dim; j++) {
 
-      // x = j * (img.width / 3);
-      // y = i * (img.height / 3);
-      let coords = getCoords(i, j);
-      tiles[i*3 + j] = img.get(coords.x, coords.y, width / 3, height / 3);
+      let coords = getImgCoords(i, j);
+      tiles[i*dim + j] = img.get(coords.x, coords.y, img.width / dim, img.height / dim);
     }
   }
   currentTile = tiles[1];
-  currentX = 100;
-  currentY = 0;
-  targetX = 0;
-  targetY = 0;
+  current = {
+    x: size / dim,
+    y: 0
+  };
+  target = {
+    x: 0,
+    y: 0
+  };
 }
 
 function getCurrentBlankSpot() {
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
+  for (let i = 0; i < dim; i++) {
+    for (let j = 0; j < dim; j++) {
       if (board[i][j] == -1) {
         return {
           i: i,
@@ -62,21 +70,10 @@ function getCurrentBlankSpot() {
 
 function changeDim(n) {
   if (n == 1) {
-    if (Math.random() >= 0.5) {
-      return 2;
-    } else {
-      return 0;
-    }
+    return (Math.random() >= 0.5) ? 2 : 0;
   } else {
     return 1;
   }
-}
-
-function isCorner(empty) {
-  return (empty[0] == 0 && empty[1] == 0)
-          || (empty[0] == 0 && empty[1] == 2)
-          || (empty[0] == 2 && empty[1] == 0)
-          || (empty[0] == 2 && empty[1] == 2);
 }
 
 function findNextSwap() {
@@ -108,44 +105,53 @@ function findNextSwap() {
 }
 
 function moveTile() {
-  if (currentX == targetX && currentY == targetY) {
+  if (current.x == target.x && current.y == target.y) {
     let swap = findNextSwap();
     let currCoords = getCoords(swap.iCur, swap.jCur);
     let targCoords = getCoords(swap.iTarg, swap.jTarg);
-    currentX = currCoords.x;
-    currentY = currCoords.y;
-    targetX = targCoords.x;
-    targetY = targCoords.y;
+    current.x = currCoords.x;
+    current.y = currCoords.y;
+    target.x = targCoords.x;
+    target.y = targCoords.y;
     currentTile = tiles[board[swap.iTarg][swap.jTarg]];
 
   } else {
-    if (currentX < targetX) {
-      currentX += step;
-    } else if (currentX > targetX) {
-      currentX -= step;
+    if (current.x < target.x) {
+      current.x += step;
+    } else if (current.x > target.x) {
+      current.x -= step;
     }
-    if (currentY < targetY) {
-      currentY += step;
-    } else if (currentY > targetY) {
-      currentY -= step;
+    if (current.y < target.y) {
+      current.y += step;
+    } else if (current.y > target.y) {
+      current.y -= step;
     }
   }
 }
 
+function isOriginalState() {
+  return board == [[-1, 1, 2], [3, 4, 5], [6, 7, 8]];
+}
+
 function draw() {
   background(220);
+
+  if (isOriginalState()) {
+
+  } else {
+    moveTile();
+  }
 
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
       let n = board[i][j];
       if (n != -1 && tiles[n] != currentTile) {
         let coords = getCoords(i, j);
-        image(tiles[n], coords.x, coords.y);
+        image(tiles[n], coords.x+horOffset, coords.y+vertOffset, 100, 100);
       }
     }
   }
 
-  moveTile();
-  image(currentTile, currentX, currentY);
+  image(currentTile, current.x+horOffset, current.y+vertOffset, 100, 100);
   console.log("hey");
 }
