@@ -8,6 +8,11 @@ let currentY;
 let targetX;
 let targetY;
 let board;
+let prevTarget = {
+  i: 0,
+  j: 0
+};
+const step = 20;
 
 function preload() {
   img = loadImage('assets/windows.jpeg');
@@ -23,7 +28,7 @@ function getCoords(r, c) {
 function setup() {
   createCanvas(300, 300);
   a = 0;
-  board = [[-1, 1, 2], [3, 4, 5], [6, 7, 8]];
+  board = [[1, -1, 2], [3, 4, 5], [6, 7, 8]];
   tiles = [];
   for (let i = 0; i < 3; i++) {
     // tiles[i] = [];
@@ -36,27 +41,34 @@ function setup() {
     }
   }
   currentTile = tiles[1];
-  currentX = 0;
+  currentX = 100;
   currentY = 0;
-  targetX = 200;
-  targetY = 200;
+  targetX = 0;
+  targetY = 0;
 }
 
-function getCurrentBlankCoords() {
+function getCurrentBlankSpot() {
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
       if (board[i][j] == -1) {
-        return [i, j];
+        return {
+          i: i,
+          j: j
+        };
       }
     }
   }
 }
 
 function changeDim(n) {
-  if (n == 0) {
-    return 2;
+  if (n == 1) {
+    if (Math.random() >= 0.5) {
+      return 2;
+    } else {
+      return 0;
+    }
   } else {
-    return 0;
+    return 1;
   }
 }
 
@@ -68,64 +80,57 @@ function isCorner(empty) {
 }
 
 function findNextSwap() {
-  let empty = getCurrentBlankCoords();
-  // let rand = Math.random();
-  let x;
-  let y;
-  if (isCorner(empty)) {
-    if (Math.random() >= 0.5) {
-      x = changeDim(empty[1]);
+  let empty = getCurrentBlankSpot();
+  let nextSwap;
+  do {
+    nextSwap = {
+      i: empty.i,
+      j: empty.j
+    };
+    if (Math.random() < 0.5) {
+      nextSwap.i = changeDim(empty.i);
     } else {
-      y = changeDim(empty[0]);
+      nextSwap.j = changeDim(empty.j);
     }
-  } else {
-    if (empty[1] == 1) {
-      if (Math.random() >= 0.5) {
-        x = 2;
-      } else {
-        x = 0;
-      }
-    } else {
-      x = 1;
-    }
+  } while (nextSwap.i == prevTarget.i && nextSwap.j == prevTarget.j);
 
-    if (empty[0] == 1) {
-      if (Math.random() >= 0.5) {
-        y = 2;
-      } else {
-        y = 0;
-      }
-    } else {
-      y = 1;
-    }
-  }
-  return [y, x];
+  board[empty.i][empty.j] = board[nextSwap.i][nextSwap.j];
+  board[nextSwap.i][nextSwap.j] = -1;
+
+  prevTarget = empty;
+
+  return {
+    iCur: nextSwap.i,
+    jCur: nextSwap.j,
+    iTarg: empty.i,
+    jTarg: empty.j
+  };
 }
 
 function moveTile() {
   if (currentX == targetX && currentY == targetY) {
+    let swap = findNextSwap();
+    let currCoords = getCoords(swap.iCur, swap.jCur);
+    let targCoords = getCoords(swap.iTarg, swap.jTarg);
+    currentX = currCoords.x;
+    currentY = currCoords.y;
+    targetX = targCoords.x;
+    targetY = targCoords.y;
+    currentTile = tiles[board[swap.iTarg][swap.jTarg]];
 
   } else {
     if (currentX < targetX) {
-      currentX += 0.5;
+      currentX += step;
     } else if (currentX > targetX) {
-      currentX -= 0.5;
+      currentX -= step;
     }
     if (currentY < targetY) {
-      currentX += 0.5;
+      currentY += step;
     } else if (currentY > targetY) {
-      currentX -= 0.5;
+      currentY -= step;
     }
   }
 }
-
-// function getTileI(n) {
-//   return Math.floor(n / 3);
-// }
-
-// function getTileJ(n) {
-//   return n % 3;
-// }
 
 function draw() {
   background(220);
@@ -142,4 +147,5 @@ function draw() {
 
   moveTile();
   image(currentTile, currentX, currentY);
+  console.log("hey");
 }
