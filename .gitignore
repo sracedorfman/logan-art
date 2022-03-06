@@ -1,5 +1,5 @@
-src/assets/imgs/*
-src/assets/fonts/*
+assets/imgs/*
+assets/fonts/*
 
 # Logs
 logs
