@@ -3,19 +3,27 @@ let tiles;
 let currentTile;
 let current;
 let target;
+let moves = 0;
+let paused = false;
+let pauseReady = false;
 let board;
+let originalBoard;
 let prevTarget = {
   i: 0,
   j: 0
 };
-let step = 10;
+let step = 100;
 const horOffset = 0;
 const vertOffset = 0;
-let size = 500;
-const dim = 3;  
+let size = 600;
+const dim = 3;
+let font,
+  fontsize = 32;
+let startTime;
 
 function preload() {
   img = loadImage('assets/square_circle.png');
+  font = loadFont('assets/NT_Josefine.otf');
 }
 
 function getImgCoords(r, c) {
@@ -33,7 +41,6 @@ function getCoords(r, c) {
 }
 
 function setup() {
-  createCanvas(900, 700);
   let newStep;
   do {
     newStep = step;
@@ -46,13 +53,26 @@ function setup() {
   } while (size % dim != 0 || newStep > step+50);
   step = newStep;
 
-  board = [[1, -1, 2], [3, 4, 5], [6, 7, 8]]; //TODO make board
+  createCanvas(size, size + 100);
+  textFont(font);
+  textSize(fontsize);
+  textAlign(CENTER, CENTER);
+  startTime = {
+    s: second(),
+    m: minute(),
+    h: hour()
+  };
+
+  // board = [[1, -1, 2], [3, 4, 5], [6, 7, 8]]; //TODO make board
   board = [];
+  originalBoard = [];
   tiles = [];
   for (let i = 0; i < dim; i++) {
     board[i] = [];
+    originalBoard[i] = [];
     for (let j = 0; j < dim; j++) {
       board[i][j] = i*dim + j;
+      originalBoard[i][j] = i*dim + j;
 
       let coords = getImgCoords(i, j);
       tiles[i*dim + j] = img.get(coords.x, coords.y, img.width / dim, img.height / dim);
@@ -60,6 +80,7 @@ function setup() {
   }
   board[0][0] = 1;
   board[0][1] = -1;
+  originalBoard[0][0] = -1;
   currentTile = tiles[1];
   current = {
     x: size / dim,
@@ -132,7 +153,8 @@ function moveTile() {
     target.x = targCoords.x;
     target.y = targCoords.y;
     currentTile = tiles[board[swap.iTarg][swap.jTarg]];
-
+    moves++;
+    return true;
   } else {
     if (current.x < target.x) {
       current.x += step;
@@ -144,20 +166,32 @@ function moveTile() {
     } else if (current.y > target.y) {
       current.y -= step;
     }
+    return false;
   }
 }
 
-function isOriginalState() {
-  return board == [[-1, 1, 2], [3, 4, 5], [6, 7, 8]];
+function formatTime() {
+  let s = Math.floor(millis() / 1000);
+  let m = Math.floor(s / 60);
+  let h = Math.floor(m / 60);
+  s -= m*60;
+  m -= h*60;
+  return h + ':' + ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2);
 }
 
 function draw() {
   background(220);
 
-  if (isOriginalState()) {
+  fill(0);
+  rect(0, size, size, 100);
 
-  } else {
-    moveTile();
+  if (!paused) {
+    if (moveTile() && pauseReady) {
+      paused = true;
+    }
+  }
+  if (board[1] == originalBoard[1] && moves > 10) {
+    pauseReady = true;
   }
 
   for (let i = 0; i < dim; i++) {
@@ -171,4 +205,9 @@ function draw() {
   }
 
   image(currentTile, current.x+horOffset, current.y+vertOffset, size/dim, size/dim);
+
+  fill(255);
+  text(moves, size/3, size+50);
+
+  text(formatTime(), size*2/3, size+50);
 }
