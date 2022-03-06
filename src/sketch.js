@@ -1,3 +1,4 @@
+let imgs;
 let img;
 let tiles;
 let currentTile;
@@ -12,7 +13,7 @@ let prevTarget = {
   i: 0,
   j: 0
 };
-let step = 100;
+let step = 40;
 const horOffset = 0;
 const vertOffset = 0;
 let size = 600;
@@ -20,9 +21,15 @@ const dim = 3;
 let font,
   fontsize = 32;
 let startTime;
+const filenames = ['windows.jpeg', 'smile.png', 'square_circle.png'];
 
 function preload() {
-  img = loadImage('assets/square_circle.png');
+  imgs = [];
+  // for (let i = 0; i < filenames.length; i++) {
+  //   imgs[i] = loadImage('assets/imgs/' + filenames[i]);
+  // }
+  // img = imgs[0];
+  img = loadImage('assets/windows.jpeg');
   font = loadFont('assets/NT_Josefine.otf');
 }
 
@@ -207,7 +214,8 @@ function draw() {
   image(currentTile, current.x+horOffset, current.y+vertOffset, size/dim, size/dim);
 
   fill(255);
-  text(moves, size/3, size+50);
+  // text(moves, size/3, size+50);
+  console.log(moves);
 
-  text(formatTime(), size*2/3, size+50);
+  text(formatTime(), size/2, size+50);
 }
