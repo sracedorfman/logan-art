@@ -27,6 +27,8 @@ let steps = 10;
 let movement = 0;
 let start;
 
+const scrollBarWidth = 12;
+
 function preload() {
   imgs = [];
   // for (let i = 0; i < filenames.length; i++) {
@@ -51,6 +53,11 @@ function getCoords(r, c) {
   };
 }
 
+function windowResized() {
+  resizeCanvas(windowWidth-scrollBarWidth, windowHeight-scrollBarWidth);
+  size = Math.min(windowWidth-scrollBarWidth, windowHeight-100-scrollBarWidth);
+}
+
 function setup() {
   // let newStep;
   // do {
@@ -63,8 +70,9 @@ function setup() {
   //   }
   // } while (size % dim != 0 || newStep > step+50);
   // step = newStep;
+  size = Math.min(windowWidth-scrollBarWidth, windowHeight-100-scrollBarWidth);
 
-  createCanvas(size, size + 100);
+  createCanvas(windowWidth-scrollBarWidth, windowHeight-scrollBarWidth);
   textFont(font);
   textSize(fontsize);
   textAlign(CENTER, CENTER);
