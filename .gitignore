@@ -1,5 +1,9 @@
-assets/imgs/*
-assets/fonts/*
+/assets/imgs/*
+/assets/fonts/*
+/.vscode/*
+# p5.js
+
+.DS_Store
 
 # Logs
 logs

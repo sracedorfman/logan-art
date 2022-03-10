@@ -16,12 +16,16 @@ let prevTarget = {
 let step = 40;
 const horOffset = 0;
 const vertOffset = 0;
-let size = 600;
+let size = 657;
 const dim = 3;
 let font,
   fontsize = 32;
 let startTime;
 const filenames = ['windows.jpeg', 'smile.png', 'square_circle.png'];
+
+let steps = 10;
+let movement = 0;
+let start;
 
 function preload() {
   imgs = [];
@@ -48,17 +52,17 @@ function getCoords(r, c) {
 }
 
 function setup() {
-  let newStep;
-  do {
-    newStep = step;
-    while ((size/dim) % newStep != 0 && newStep < size/dim) {
-      newStep++;
-    }
-    if (newStep > step+50) {
-      size++;
-    }
-  } while (size % dim != 0 || newStep > step+50);
-  step = newStep;
+  // let newStep;
+  // do {
+  //   newStep = step;
+  //   while ((size/dim) % newStep != 0 && newStep < size/dim) {
+  //     newStep++;
+  //   }
+  //   if (newStep > step+50) {
+  //     size++;
+  //   }
+  // } while (size % dim != 0 || newStep > step+50);
+  // step = newStep;
 
   createCanvas(size, size + 100);
   textFont(font);
@@ -95,6 +99,11 @@ function setup() {
   };
   target = {
     x: 0,
+    y: 0
+  };
+
+  start = {
+    x: size / dim,
     y: 0
   };
 }
@@ -151,28 +160,58 @@ function findNextSwap() {
 }
 
 function moveTile() {
-  if (current.x == target.x && current.y == target.y) {
+  // if (current.x == target.x && current.y == target.y) {
+  //   let swap = findNextSwap();
+  //   let currCoords = getCoords(swap.iCur, swap.jCur);
+  //   let targCoords = getCoords(swap.iTarg, swap.jTarg);
+  //   current.x = currCoords.x;
+  //   current.y = currCoords.y;
+  //   target.x = targCoords.x;
+  //   target.y = targCoords.y;
+  //   currentTile = tiles[board[swap.iTarg][swap.jTarg]];
+  //   moves++;
+  //   return true;
+  // } else {
+  //   if (current.x < target.x) {
+  //     current.x += step;
+  //   } else if (current.x > target.x) {
+  //     current.x -= step;
+  //   }
+  //   if (current.y < target.y) {
+  //     current.y += step;
+  //   } else if (current.y > target.y) {
+  //     current.y -= step;
+  //   }
+  //   return false;
+  // }
+
+  if (movement > steps) {
     let swap = findNextSwap();
     let currCoords = getCoords(swap.iCur, swap.jCur);
     let targCoords = getCoords(swap.iTarg, swap.jTarg);
+    start.x = currCoords.x;
+    start.y = currCoords.y;
     current.x = currCoords.x;
     current.y = currCoords.y;
     target.x = targCoords.x;
     target.y = targCoords.y;
     currentTile = tiles[board[swap.iTarg][swap.jTarg]];
     moves++;
+    movement = 0;
+    // console.log(currCoords.x + ',' + currCoords.y + ' : ' + targCoords.x + ',' + targCoords.y);
     return true;
   } else {
-    if (current.x < target.x) {
-      current.x += step;
-    } else if (current.x > target.x) {
-      current.x -= step;
+    if (start.x < target.x) {
+      current.x = start.x + ((target.x - start.x)/steps*movement);
+    } else if (start.x > target.x) {
+      current.x = start.x - ((start.x - target.x)/steps*movement);;
     }
-    if (current.y < target.y) {
-      current.y += step;
-    } else if (current.y > target.y) {
-      current.y -= step;
+    if (start.y < target.y) {
+      current.y = start.y + ((target.y - start.y)/steps*movement);
+    } else if (start.y > target.y) {
+      current.y = start.y - ((start.y - target.y)/steps*movement);;
     }
+    movement++;
     return false;
   }
 }
@@ -215,7 +254,7 @@ function draw() {
 
   fill(255);
   // text(moves, size/3, size+50);
-  console.log(moves);
+  // console.log(moves);
 
   text(formatTime(), size/2, size+50);
 }
