@@ -2,7 +2,7 @@ let imgs;
 let img;
 let tiles;
 let currentTile;
-let current;
+let position;
 let target;
 let moves = 0;
 let paused = false;
@@ -23,9 +23,11 @@ let font,
 let startTime;
 const filenames = ['windows.jpeg', 'smile.png', 'square_circle.png'];
 
-let steps = 10;
+let steps = 5;
 let movement = 0;
 let start;
+
+let lastTime;
 
 const scrollBarWidth = 12;
 
@@ -34,8 +36,12 @@ function preload() {
   // for (let i = 0; i < filenames.length; i++) {
   //   imgs[i] = loadImage('assets/imgs/' + filenames[i]);
   // }
-  // img = imgs[0];
+  // img = imgs[Math.floor(Math.random()*imgs.length)];
   img = loadImage('assets/windows.jpeg');
+  if (img.width != img.height) {
+    let min = Math.min(img.width, img.height);
+    img = img.get(0, 0, min, min);
+  }
   font = loadFont('assets/NT_Josefine.otf');
 }
 
@@ -101,7 +107,7 @@ function setup() {
   board[0][1] = -1;
   originalBoard[0][0] = -1;
   currentTile = tiles[1];
-  current = {
+  position = {
     x: size / dim,
     y: 0
   };
@@ -116,7 +122,7 @@ function setup() {
   };
 }
 
-function getCurrentBlankSpot() {
+function getBlankSpot() {
   for (let i = 0; i < dim; i++) {
     for (let j = 0; j < dim; j++) {
       if (board[i][j] == -1) {
@@ -140,7 +146,7 @@ function changeDim(n) {
 }
 
 function findNextSwap() {
-  let empty = getCurrentBlankSpot();
+  let empty = getBlankSpot();
   let nextSwap;
   do {
     nextSwap = {
@@ -168,56 +174,24 @@ function findNextSwap() {
 }
 
 function moveTile() {
-  // if (current.x == target.x && current.y == target.y) {
-  //   let swap = findNextSwap();
-  //   let currCoords = getCoords(swap.iCur, swap.jCur);
-  //   let targCoords = getCoords(swap.iTarg, swap.jTarg);
-  //   current.x = currCoords.x;
-  //   current.y = currCoords.y;
-  //   target.x = targCoords.x;
-  //   target.y = targCoords.y;
-  //   currentTile = tiles[board[swap.iTarg][swap.jTarg]];
-  //   moves++;
-  //   return true;
-  // } else {
-  //   if (current.x < target.x) {
-  //     current.x += step;
-  //   } else if (current.x > target.x) {
-  //     current.x -= step;
-  //   }
-  //   if (current.y < target.y) {
-  //     current.y += step;
-  //   } else if (current.y > target.y) {
-  //     current.y -= step;
-  //   }
-  //   return false;
-  // }
-
   if (movement > steps) {
     let swap = findNextSwap();
     let currCoords = getCoords(swap.iCur, swap.jCur);
     let targCoords = getCoords(swap.iTarg, swap.jTarg);
     start.x = currCoords.x;
     start.y = currCoords.y;
-    current.x = currCoords.x;
-    current.y = currCoords.y;
+    position = start;
     target.x = targCoords.x;
     target.y = targCoords.y;
     currentTile = tiles[board[swap.iTarg][swap.jTarg]];
     moves++;
     movement = 0;
-    // console.log(currCoords.x + ',' + currCoords.y + ' : ' + targCoords.x + ',' + targCoords.y);
     return true;
   } else {
-    if (start.x < target.x) {
-      current.x = start.x + ((target.x - start.x)/steps*movement);
-    } else if (start.x > target.x) {
-      current.x = start.x - ((start.x - target.x)/steps*movement);;
-    }
-    if (start.y < target.y) {
-      current.y = start.y + ((target.y - start.y)/steps*movement);
-    } else if (start.y > target.y) {
-      current.y = start.y - ((start.y - target.y)/steps*movement);;
+    if (start.x != target.x) {
+      position.x = start.x + ((target.x - start.x)/steps*movement);
+    } else {
+      position.y = start.y + ((target.y - start.y)/steps*movement);
     }
     movement++;
     return false;
@@ -230,7 +204,11 @@ function formatTime() {
   let h = Math.floor(m / 60);
   s -= m*60;
   m -= h*60;
-  return h + ':' + ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2);
+  let time = h + ':' + ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2);
+  if (!paused) {
+    lastTime = time;
+  }
+  return time;
 }
 
 function draw() {
@@ -241,6 +219,7 @@ function draw() {
 
   if (!paused) {
     if (moveTile() && pauseReady) {
+      console.log(formatTime());
       paused = true;
     }
   }
@@ -258,11 +237,14 @@ function draw() {
     }
   }
 
-  image(currentTile, current.x+horOffset, current.y+vertOffset, size/dim, size/dim);
+  image(currentTile, position.x+horOffset, position.y+vertOffset, size/dim, size/dim);
 
   fill(255);
   // text(moves, size/3, size+50);
   // console.log(moves);
-
-  text(formatTime(), size/2, size+50);
+  if (!paused) {
+    text(formatTime(), size/2, size+50);
+  } else {
+    text(lastTime, size/2, size+50);
+  }
 }
