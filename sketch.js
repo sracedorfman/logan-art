@@ -35,7 +35,7 @@ function preload() {
   //   imgs[i] = loadImage('assets/imgs/' + filenames[i]);
   // }
   // img = imgs[Math.floor(Math.random()*imgs.length)];
-  img = loadImage('assets/imgs/windows.jpeg');
+  img = loadImage('assets/windows.jpeg');
   if (img.width != img.height) {
     let min = Math.min(img.width, img.height);
     img = img.get(0, 0, min, min);
