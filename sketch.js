@@ -13,7 +13,6 @@ let prevTarget = {
   i: 0,
   j: 0
 };
-let step = 40;
 const horOffset = 0;
 const vertOffset = 0;
 let size = 657;
@@ -21,13 +20,12 @@ const dim = 3;
 let font,
   fontsize = 32;
 let startTime;
-const filenames = ['windows.jpeg', 'smile.png', 'square_circle.png'];
+let endTime;
+const filenames = ['windows.jpeg', 'smile.png', 'square_circle.png', 'lotto.png'];
 
 let steps = 5;
 let movement = 0;
 let start;
-
-let lastTime;
 
 const scrollBarWidth = 12;
 
@@ -37,7 +35,7 @@ function preload() {
   //   imgs[i] = loadImage('assets/imgs/' + filenames[i]);
   // }
   // img = imgs[Math.floor(Math.random()*imgs.length)];
-  img = loadImage('assets/windows.jpeg');
+  img = loadImage('assets/imgs/windows.jpeg');
   if (img.width != img.height) {
     let min = Math.min(img.width, img.height);
     img = img.get(0, 0, min, min);
@@ -65,17 +63,6 @@ function windowResized() {
 }
 
 function setup() {
-  // let newStep;
-  // do {
-  //   newStep = step;
-  //   while ((size/dim) % newStep != 0 && newStep < size/dim) {
-  //     newStep++;
-  //   }
-  //   if (newStep > step+50) {
-  //     size++;
-  //   }
-  // } while (size % dim != 0 || newStep > step+50);
-  // step = newStep;
   size = Math.min(windowWidth-scrollBarWidth, windowHeight-100-scrollBarWidth);
 
   createCanvas(windowWidth-scrollBarWidth, windowHeight-scrollBarWidth);
@@ -206,7 +193,7 @@ function formatTime() {
   m -= h*60;
   let time = h + ':' + ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2);
   if (!paused) {
-    lastTime = time;
+    endTime = time;
   }
   return time;
 }
@@ -223,7 +210,8 @@ function draw() {
       paused = true;
     }
   }
-  if (board[1] == originalBoard[1] && moves > 10) {
+  if (board.every((row, r) => row.every((val, c) => val === originalBoard[r][c]))) {
+  // if (board[2].every((val, index) => val === originalBoard[2][index]) && moves > 2) {
     pauseReady = true;
   }
 
@@ -245,6 +233,6 @@ function draw() {
   if (!paused) {
     text(formatTime(), size/2, size+50);
   } else {
-    text(lastTime, size/2, size+50);
+    text(endTime, size/2, size+50);
   }
 }
